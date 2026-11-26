@@ -97,6 +97,72 @@ body {
   font: inherit;
   cursor: pointer;
 }
+.docs {
+  max-width: 800px; /* Matches typical chat container widths */
+  margin: 3rem auto 4rem;
+  padding: 0 1rem;
+  line-height: 1.6;
+}
+
+.docs__header {
+  margin-bottom: 1.5rem;
+}
+
+.docs__header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+}
+
+.docs__subtitle {
+  margin: 0;
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.docs__item {
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 8px;
+  background-color: rgba(128, 128, 128, 0.04);
+}
+
+.docs__item h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.docs__item p {
+  margin: 0;
+}
+
+.docs__item p + p {
+  margin-top: 0.75rem;
+}
+
+.docs__divider {
+  border: 0;
+  border-top: 1px solid rgba(128, 128, 128, 0.25);
+  margin: 2.5rem 0;
+}
+
+/* Terminal output blocks */
+.docs__item pre {
+  margin: 0.5rem 0 0 0;
+  padding: 1rem;
+  border-radius: 6px;
+  background-color: #1e1e1e;
+  color: #e6e6e6;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.docs__item pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
 
 .btn:disabled { opacity: 0.5; cursor: wait; }
 .btn--ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 0.45rem 0.9rem; }

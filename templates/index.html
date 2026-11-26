@@ -1,32 +1,246 @@
 <!DOCTYPE html>
 <html lang="fi">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Viikko 5 – LLM-chat (CI/CD)</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<!-- data-base = alipolku (esim. /viikko5), jota app.js käyttää API-kutsuissa -->
-<body data-base="{{ request.script_root }}">
-  <main class="chat">
-    <header class="chat__header">
-      <div>
-        <h1>LLM-chat</h1>
-        <p class="chat__meta">Malli: <code>{{ model }}</code> · Nginx → Gunicorn/Flask → Ollama · MariaDB</p>
-      </div>
-      <button type="button" id="new-chat" class="btn btn--ghost">Uusi keskustelu</button>
-    </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Viikko 5 – LLM-chat (CI/CD)</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <!-- data-base = alipolku (esim. /viikko5), jota app.js käyttää API-kutsuissa -->
+  <body data-base="{{ request.script_root }}">
+    <main class="chat">
+      <header class="chat__header">
+        <div>
+          <h1>LLM-chat</h1>
+          <p class="chat__meta">
+            Malli: <code>{{ model }}</code> · Nginx → Gunicorn/Flask → Ollama ·
+            MariaDB
+          </p>
+        </div>
+        <button type="button" id="new-chat" class="btn btn--ghost">
+          Uusi keskustelu
+        </button>
+      </header>
 
-    <section id="messages" class="chat__messages" aria-live="polite">
-      <p class="chat__empty" id="empty-hint">Kirjoita viesti alle aloittaaksesi keskustelun.</p>
+      <section id="messages" class="chat__messages" aria-live="polite">
+        <p class="chat__empty" id="empty-hint">
+          Kirjoita viesti alle aloittaaksesi keskustelun.
+        </p>
+      </section>
+
+      <form id="chat-form" class="chat__form" autocomplete="off">
+        <textarea
+          id="message"
+          name="message"
+          rows="2"
+          maxlength="2000"
+          placeholder="Kirjoita viesti… (Enter lähettää, Shift+Enter rivinvaihto)"
+          required
+        ></textarea>
+        <button type="submit" id="send" class="btn">Lähetä</button>
+      </form>
+    </main>
+
+    <!-- Documentation Section -->
+    <section class="docs" id="documentation">
+      <header class="docs__header">
+        <h2>Week 5 Documentation</h2>
+      </header>
+
+      <article class="docs__item">
+        <h3>Links</h3>
+        <p>
+          <strong>Chat page:</strong> <a href="/viikko5/">/viikko5/</a><br />
+          <strong>GitHub repository:</strong>
+          <a
+            href="https://github.com/joni9231/linux_week5_cicd"
+            target="_blank"
+            rel="noopener"
+          >
+            https://github.com/joni9231/linux_week5_cicd
+          </a>
+        </p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Request Path (Browser → Nginx → App → Model / Database)</h3>
+        <p>Write your description or paste an ASCII/SVG diagram here...</p>
+      </article>
+
+      <article class="docs__item">
+        <h3>CI/CD Pipeline</h3>
+        <p>
+          Describe what runs on pull requests, what runs on main, and how a
+          deployment is verified...
+        </p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Users, File Permissions &amp; Secrets</h3>
+        <p>
+        The service runs as a dedicated chatapp user:
+        <code>systemctl show chatapp -p User -p Group</code>:
+          User=chatapp
+          Group=chatapp
+
+          The chatapp database is used by chatapp@localhost, and it only has privileges for that database.
+          The deployed code is owned by ubuntu, chatapp user can only read/execute it.
+          The secrets are stored inside /etc/chatapp/chatapp.env
+          // tarinoi lisää tähän
+        </p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Nginx Configuration (/viikko5/)</h3>
+        <p>
+          /viikko5/ was added to the nginx configuration by adding
+           <code>include snippets/chatapp.conf;</code> to the existing server{} block.
+           This means all the nginx changes related to chatapp are done to chatapp.conf rather than changing the previous parts
+        </p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Model Choice, Memory &amp; Disk Usage</h3>
+        <p>
+          Tried some models, qwen2.5:3b seems to be a bit smarter than the original while still being fast enough.
+          qwen2.5:3b takes about 2.2gb ram of the server's 7.6gb total ram.
+          Disk usage: this qwen model takes only 1.9gb out of 76gb total.
+          <code>df -h /</code>
+          Filesystem      Size  Used Avail Use% Mounted on
+          /dev/vda1        77G  8.3G   69G  11% /
+        </p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Database Replication to Server B (Week 4)</h3>
+        <p>
+          The chat database is replicated to server B.
+          There are no filters in place that would make the replication exclusive to the week 4 database.
+          i confirmed this by checking <code>SHOW REPLICA STATUS\G</code> 
+          Replicate_Do_DB:
+          Replicate_Ignore_DB:
+
+        </p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Test Results</h3>
+        <p>Paste or describe the required test results here...</p>
+      </article>
+
+      <article class="docs__item">
+        <h3>Problem Solved / Lesson Learned</h3>
+        <p>My previous assignments used MySQL. running the setup script broke my week2/week4 counters.
+          Had to restore a previous snapshot and modidy the files a bit for MySQL compatibility </p>
+      </article>
+
+      <hr class="docs__divider" />
+
+      <header class="docs__header">
+        <h2>Evidence from the Server</h2>
+        <p class="docs__subtitle">
+          Command outputs with secrets removed.
+        </p>
+      </header>
+
+      <article class="docs__item">
+        <h3>
+          Service Status &amp; User/Group (<code>systemctl status</code> &amp;
+          <code>systemctl show</code>)
+        </h3>
+        <pre><code>systemctl status chatapp</code>:
+● chatapp.service - LLM-chat (Flask + Gunicorn)
+     Loaded: loaded (/etc/systemd/system/chatapp.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2026-11-25 22:43:45 EET; 20h ago
+ Invocation: 451eece317094b708e873298a21c6dac
+   Main PID: 10779 (gunicorn)
+      Tasks: 5 (limit: 7955)
+     Memory: 88M (peak: 89M)
+        CPU: 34.447s
+     CGroup: /system.slice/chatapp.service
+             ├─10779 /opt/chatapp/venv/bin/python3 /opt/chatapp/venv/bin/gunicorn --workers 2 --worker-class gthread --threads 8 --timeout 300 --bind unix:/run/chatapp/gunicorn.sock --umask 007 --access-logfile - app:app
+             ├─10782 /opt/chatapp/venv/bin/python3 /opt/chatapp/venv/bin/gunicorn --workers 2 --worker-class gthread --threads 8 --timeout 300 --bind unix:/run/chatapp/gunicorn.sock --umask 007 --access-logfile - app:app
+             └─10783 /opt/chatapp/venv/bin/python3 /opt/chatapp/venv/bin/gunicorn --workers 2 --worker-class gthread --threads 8 --timeout 300 --bind unix:/run/chatapp/gunicorn.sock --umask 007 --access-logfile - app:app
+
+Nov 26 17:40:20 jonivma gunicorn[10783]: <CLIENT_IP> - - [26/Nov/2026:17:40:20 +0200] "GET / HTTP/1.1" 200 1276 "-" "Mozilla/5.0 ..."
+Nov 26 17:40:20 jonivma gunicorn[10783]: <CLIENT_IP> - - [26/Nov/2026:17:40:20 +0200] "GET /api/history/<SESSION_ID> HTTP/1.1" 200 311 "http://<SERVER_IP>/viikko5/" "Mozilla/5.0 ..."
+Nov 26 17:40:28 jonivma gunicorn[10783]: <CLIENT_IP> - - [26/Nov/2026:17:40:28 +0200] "POST /api/chat HTTP/1.1" 200 731 "http://<SERVER_IP>/viikko5/" "Mozilla/5.0 ..."
+
+<code>systemctl show chatapp -p User -p Group</code>:
+User=chatapp
+Group=chatapp/code></pre>
+      </article>
+
+      <article class="docs__item">
+        <h3>Directory, Env File &amp; Socket Permissions (<code>ls -l</code>)</h3>
+        <pre><code>ls -la /opt/chatapp/app</code>
+total 72
+drwxr-xr-x 6 ubuntu ubuntu 4096 Nov 25 22:05 .
+drwxr-xr-x 4 ubuntu ubuntu 4096 Nov 25 21:55 ..
+-rw-r--r-- 1 ubuntu ubuntu  229 Nov 25 22:05 .gitattributes
+-rw-r--r-- 1 ubuntu ubuntu  181 Nov 25 22:05 .gitignore
+-rw-rw-r-- 1 ubuntu ubuntu   41 Nov 25 22:05 REVISION
+-rw-r--r-- 1 ubuntu ubuntu 4482 Nov 25 22:05 app.py
+-rw-r--r-- 1 ubuntu ubuntu 1918 Nov 25 22:05 db.py
+drwxr-xr-x 5 ubuntu ubuntu 4096 Nov 25 22:05 deploy
+-rw-r--r-- 1 ubuntu ubuntu  149 Nov 25 22:05 pyproject.toml
+-rw-r--r-- 1 ubuntu ubuntu   63 Nov 25 22:05 readme.md
+-rw-r--r-- 1 ubuntu ubuntu   39 Nov 25 22:05 requirements-dev.txt
+-rw-r--r-- 1 ubuntu ubuntu   77 Nov 25 22:05 requirements.txt
+drwxr-xr-x 2 ubuntu ubuntu 4096 Nov 25 22:05 scripts
+drwxr-xr-x 2 ubuntu ubuntu 4096 Nov 25 22:05 static
+drwxr-xr-x 2 ubuntu ubuntu 4096 Nov 25 22:05 templates
+-rw-r--r-- 1 ubuntu ubuntu 4979 Nov 25 22:05 test_app.py
+
+<code>ls -l /etc/chatapp/chatapp.env </code>
+-rw-r----- 1 root chatapp 266 Nov 25 22:43 /etc/chatapp/chatapp.env
+<code>ls -l /run/chatapp/gunicorn.sock</code>
+srwxrwx--- 1 chatapp chatapp 0 Nov 25 22:43 /run/chatapp/gunicorn.sock
+        </code></pre>
+      </article>
+
+      <article class="docs__item">
+        <h3>Database Grants (<code>SHOW GRANTS</code>)</h3>
+        <pre><code>SHOW GRANTS FOR 'chatapp'@'localhost';</code></pre>
++----------------------------------------------------------------------------------------------------+
+| Grants for chatapp@localhost                                                                       |
++----------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `chatapp`@`localhost`                                                        |
+| GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER ON `chatapp`.* TO `chatapp`@`localhost` |
++----------------------------------------------------------------------------------------------------+
+      </article>
+
+      <article class="docs__item">
+        <h3>Loaded Model &amp; Memory Usage</h3>
+        <code>ollama list</code>
+        <pre>NAME          ID              SIZE      MODIFIED
+            qwen2.5:3b    357c53fb659c    1.9 GB    20 hours ago
+<code>free -h</code>
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       3.2Gi       2.0Gi       4.1Mi       2.6Gi       4.4Gi
+Swap:             0B          0B          0B
+</pre>
+      </article>
+
+      <article class="docs__item">
+        <h3>Listening Ports on Localhost (<code>sudo ss -ltnp</code>)</h3>
+        <pre><code>State          Recv-Q          Send-Q                   Local Address:Port                    Peer Address:Port         Process
+LISTEN         0               4096                           0.0.0.0:22                           0.0.0.0:*             users:(("sshd",pid=979,fd=3),("systemd",pid=1,fd=186))
+LISTEN         0               511                            0.0.0.0:80                           0.0.0.0:*             users:(("nginx",pid=8583,fd=5),("nginx",pid=8582,fd=5),("nginx",pid=8581,fd=5),("nginx",pid=8579,fd=5),("nginx",pid=7833,fd=5))
+LISTEN         0               4096                         127.0.0.1:11434                        0.0.0.0:*             users:(("ollama",pid=10285,fd=4))
+LISTEN         0               70                           127.0.0.1:33060                        0.0.0.0:*             users:(("mysqld",pid=1158,fd=31))
+LISTEN         0               4096                        127.0.0.54:53                           0.0.0.0:*             users:(("systemd-resolve",pid=525,fd=19))
+LISTEN         0               2048                         127.0.0.1:5000                         0.0.0.0:*             users:(("gunicorn",pid=9384,fd=3),("gunicorn",pid=9380,fd=3),("gunicorn",pid=9379,fd=3),("gunicorn",pid=9356,fd=3))
+LISTEN         0               4096                     127.0.0.53%lo:53                           0.0.0.0:*             users:(("systemd-resolve",pid=525,fd=17))
+LISTEN         0               151                            0.0.0.0:3306                         0.0.0.0:*             users:(("mysqld",pid=1158,fd=33))
+LISTEN         0               4096                              [::]:22                              [::]:*             users:(("sshd",pid=979,fd=4),("systemd",pid=1,fd=187))
+LISTEN         0               511                               [::]:80                              [::]:*             users:(("nginx",pid=8583,fd=6),("nginx",pid=8582,fd=6),("nginx",pid=8581,fd=6),("nginx",pid=8579,fd=6),("nginx",pid=7833,fd=6))</code></pre>
+      </article>
     </section>
 
-    <form id="chat-form" class="chat__form" autocomplete="off">
-      <textarea id="message" name="message" rows="2" maxlength="2000"
-                placeholder="Kirjoita viesti… (Enter lähettää, Shift+Enter rivinvaihto)" required></textarea>
-      <button type="submit" id="send" class="btn">Lähetä</button>
-    </form>
-  </main>
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
 </html>
