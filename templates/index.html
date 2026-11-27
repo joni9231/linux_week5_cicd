@@ -51,9 +51,7 @@
       </header>
 
       <article class="docs__item">
-        <h3>Links</h3>
         <p>
-          <strong>Chat page:</strong> <a href="/viikko5/">/viikko5/</a><br />
           <strong>GitHub repository:</strong>
           <a
             href="https://github.com/joni9231/linux_week5_cicd"
@@ -67,14 +65,23 @@
 
       <article class="docs__item">
         <h3>Request Path (Browser → Nginx → App → Model / Database)</h3>
-        <p>Write your description or paste an ASCII/SVG diagram here...</p>
+        <pre>
+        Browser ──HTTP:80──▶ Nginx
+                              ├── previous weeks
+                              |── /viikko5/  (snippet)
+                                  │
+                                  ├── /viikko5/static/  → static files from disk
+                                  └── unix-socket ──▶ Gunicorn + Flask ──HTTP──▶ Ollama (127.0.0.1:11434)
+                                                            │
+                                                          MySQL (localhost, chatapp)</pre>
       </article>
 
       <article class="docs__item">
         <h3>CI/CD Pipeline</h3>
         <p>
-          Describe what runs on pull requests, what runs on main, and how a
-          deployment is verified...
+        Pull request: only the test job runs, does not deploy.
+        Push to main: First the test job, if it passes, the deploy job connects to the server with ssh, uploads the code with rsync and runs deploy.sh
+        Deployment is verified by tests; SHA value in viikko5/health, a check if the /viikko5/ loads, and if /viikko5/static/app.js is served. 
         </p>
       </article>
 
@@ -82,14 +89,14 @@
         <h3>Users, File Permissions &amp; Secrets</h3>
         <p>
         The service runs as a dedicated chatapp user:
-        <code>systemctl show chatapp -p User -p Group</code>:
+        systemctl show chatapp -p User -p Group
           User=chatapp
           Group=chatapp
 
           The chatapp database is used by chatapp@localhost, and it only has privileges for that database.
           The deployed code is owned by ubuntu, chatapp user can only read/execute it.
-          The secrets are stored inside /etc/chatapp/chatapp.env
-          // more here---
+          The chatapp secrets are stored inside /etc/chatapp/chatapp.env and excluded from github version control through .gitignore.
+          Secrets related to deployment such as SSH keys, Host, Known hosts, user, are stored in github actions secrets.
         </p>
       </article>
 
@@ -105,10 +112,19 @@
       <article class="docs__item">
         <h3>Model Choice, Memory &amp; Disk Usage</h3>
         <p>
-          Tried some models, qwen2.5:3b seems to be a bit smarter than the original while still being fast enough.<br>
+          Tried some models, qwen2.5:3b seems to be a little bit smarter than the original while still being fast enough.<br>
           qwen2.5:3b takes about 2.2gb ram of the server's 7.6gb total ram.<br>
-          Disk usage: this qwen model takes only 1.9gb out of 76gb total.<br>
-          <pre>>df -h /
+          <pre>ollama ps
+          NAME          ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL
+          qwen2.5:3b    357c53fb659c    2.2 GB    100% CPU     4096       llamacpp    4 minutes from now</pre>
+          <br>
+          Disk usage: this qwen model takes only 1.9gb out of 77gb total.<br>
+          <pre>
+          ollama list
+          NAME          ID              SIZE      MODIFIED
+          qwen2.5:3b    357c53fb659c    1.9 GB    20 hours ago
+          <br>
+          df -h /
           Filesystem      Size  Used Avail Use% Mounted on
           /dev/vda1        77G  8.3G   69G  11% /</pre>
         </p>
@@ -172,7 +188,7 @@ Nov 26 17:40:28 jonivma gunicorn[10783]: <CLIENT_IP> - - [26/Nov/2026:17:40:28 +
 
 <code>systemctl show chatapp -p User -p Group</code>:
 User=chatapp
-Group=chatapp/code></pre>
+Group=chatapp/</code></pre>
       </article>
 
       <article class="docs__item">
@@ -200,7 +216,7 @@ drwxr-xr-x 2 ubuntu ubuntu 4096 Nov 25 22:05 templates
 -rw-r----- 1 root chatapp 266 Nov 25 22:43 /etc/chatapp/chatapp.env
 <code>ls -l /run/chatapp/gunicorn.sock</code>
 srwxrwx--- 1 chatapp chatapp 0 Nov 25 22:43 /run/chatapp/gunicorn.sock
-        </code></pre>
+      </pre>
       </article>
 
       <article class="docs__item">
