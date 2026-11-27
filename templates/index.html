@@ -79,8 +79,8 @@
       <article class="docs__item">
         <h3>CI/CD Pipeline</h3>
         <p>
-        Pull request: only the test job runs, does not deploy.
-        Push to main: First the test job, if it passes, the deploy job connects to the server with ssh, uploads the code with rsync and runs deploy.sh
+        Pull request: only the test job runs, does not deploy.<br>
+        Push to main: First the test job, if it passes, the deploy job connects to the server with ssh, uploads the code with rsync and runs deploy.sh<br>
         Deployment is verified by tests; SHA value in viikko5/health, a check if the /viikko5/ loads, and if /viikko5/static/app.js is served. 
         </p>
       </article>
@@ -89,22 +89,23 @@
         <h3>Users, File Permissions &amp; Secrets</h3>
         <p>
         The service runs as a dedicated chatapp user:
-        systemctl show chatapp -p User -p Group
+        <pre>
+          systemctl show chatapp -p User -p Group
           User=chatapp
-          Group=chatapp
+          Group=chatapp</pre>
 
-          The chatapp database is used by chatapp@localhost, and it only has privileges for that database.
-          The deployed code is owned by ubuntu, chatapp user can only read/execute it.
-          The chatapp secrets are stored inside /etc/chatapp/chatapp.env and excluded from github version control through .gitignore.
-          Secrets related to deployment such as SSH keys, Host, Known hosts, user, are stored in github actions secrets.
+          The chatapp database is used by chatapp@localhost, and it only has privileges for that database.<br>
+          The deployed code is owned by ubuntu, chatapp user can only read/execute it.<br>
+          The chatapp secrets are stored inside /etc/chatapp/chatapp.env and excluded from github version control through .gitignore.<br>
+          Secrets related to deployment such as SSH keys, Host, Known hosts, user, are stored in github actions secrets.<br>
         </p>
       </article>
 
       <article class="docs__item">
         <h3>Nginx Configuration (/viikko5/)</h3>
         <p>
-          /viikko5/ was added to the nginx configuration by adding
-           <pre>include snippets/chatapp.conf;</pre> to the existing server{} block.<br>
+          /viikko5/ was added to the nginx configuration by adding<br>
+           " include snippets/chatapp.conf; "  to the existing server{} block.<br>
            This means all the nginx changes related to chatapp are done to chatapp.conf rather than changing the previous parts
         </p>
       </article>
