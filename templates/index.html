@@ -89,7 +89,7 @@
           The chatapp database is used by chatapp@localhost, and it only has privileges for that database.
           The deployed code is owned by ubuntu, chatapp user can only read/execute it.
           The secrets are stored inside /etc/chatapp/chatapp.env
-          // tarinoi lisää tähän
+          // more here---
         </p>
       </article>
 
@@ -97,7 +97,7 @@
         <h3>Nginx Configuration (/viikko5/)</h3>
         <p>
           /viikko5/ was added to the nginx configuration by adding
-           <code>include snippets/chatapp.conf;</code> to the existing server{} block.
+           <pre>include snippets/chatapp.conf;</pre> to the existing server{} block.<br>
            This means all the nginx changes related to chatapp are done to chatapp.conf rather than changing the previous parts
         </p>
       </article>
@@ -105,12 +105,12 @@
       <article class="docs__item">
         <h3>Model Choice, Memory &amp; Disk Usage</h3>
         <p>
-          Tried some models, qwen2.5:3b seems to be a bit smarter than the original while still being fast enough.
-          qwen2.5:3b takes about 2.2gb ram of the server's 7.6gb total ram.
-          Disk usage: this qwen model takes only 1.9gb out of 76gb total.
-          <code>df -h /</code>
+          Tried some models, qwen2.5:3b seems to be a bit smarter than the original while still being fast enough.<br>
+          qwen2.5:3b takes about 2.2gb ram of the server's 7.6gb total ram.<br>
+          Disk usage: this qwen model takes only 1.9gb out of 76gb total.<br>
+          <pre>>df -h /
           Filesystem      Size  Used Avail Use% Mounted on
-          /dev/vda1        77G  8.3G   69G  11% /
+          /dev/vda1        77G  8.3G   69G  11% /</pre>
         </p>
       </article>
 
@@ -119,10 +119,11 @@
         <p>
           The chat database is replicated to server B.
           There are no filters in place that would make the replication exclusive to the week 4 database.
-          i confirmed this by checking <code>SHOW REPLICA STATUS\G</code> 
-          Replicate_Do_DB:
-          Replicate_Ignore_DB:
-
+          i confirmed this by checking <pre>
+          SHOW REPLICA STATUS\G <br>
+          Replicate_Do_DB:<br>
+          Replicate_Ignore_DB:<br>
+          </pre>
         </p>
       </article>
 
@@ -204,19 +205,19 @@ srwxrwx--- 1 chatapp chatapp 0 Nov 25 22:43 /run/chatapp/gunicorn.sock
 
       <article class="docs__item">
         <h3>Database Grants (<code>SHOW GRANTS</code>)</h3>
-        <pre><code>SHOW GRANTS FOR 'chatapp'@'localhost';</code></pre>
+        <pre>SHOW GRANTS FOR 'chatapp'@'localhost';
 +----------------------------------------------------------------------------------------------------+
 | Grants for chatapp@localhost                                                                       |
 +----------------------------------------------------------------------------------------------------+
 | GRANT USAGE ON *.* TO `chatapp`@`localhost`                                                        |
 | GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER ON `chatapp`.* TO `chatapp`@`localhost` |
-+----------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+</pre>
       </article>
 
       <article class="docs__item">
         <h3>Loaded Model &amp; Memory Usage</h3>
-        <code>ollama list</code>
-        <pre>NAME          ID              SIZE      MODIFIED
+        <pre>ollama list
+            NAME          ID              SIZE      MODIFIED
             qwen2.5:3b    357c53fb659c    1.9 GB    20 hours ago
 <code>free -h</code>
                total        used        free      shared  buff/cache   available
